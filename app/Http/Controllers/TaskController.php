@@ -2,8 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use PDOException;
+
 use App\Task;
+use App\Http\Resources\TaskResource;
+
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\Validator;
+use Illuminate\Validation\ValidationException;
 
 class TaskController extends Controller
 {
@@ -12,19 +20,15 @@ class TaskController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
-    }
+        $filters = $request->input('filters');
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        $tasks = Task::all();
+
+        return [
+            'data' => TaskResource::collection($tasks),
+        ];
     }
 
     /**
