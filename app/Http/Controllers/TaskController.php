@@ -56,17 +56,6 @@ class TaskController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Task  $task
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Task $task)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -75,7 +64,19 @@ class TaskController extends Controller
      */
     public function update(Request $request, Task $task)
     {
-        //
+        $task->state = $request['done'] ? 'done' : 'pending';
+        $task->description = $request['description'] ?? $task->description;
+
+        try {
+            $task->validate();
+            $task->save();
+        } catch (ValidationException $e) {
+            return new JsonResponse([ 'errors' => $e->errors() ], 400);
+        } catch (PDOException $e) {
+            return new JsonResponse([ 'errors' => $e->getMessage() ]);
+        }
+
+        return new TaskResource($task);
     }
 
     /**
