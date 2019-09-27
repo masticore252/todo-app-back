@@ -39,18 +39,20 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
-        //
-    }
+        try {
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Task  $task
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Task $task)
-    {
-        //
+            $task = new Task($request->only('description'));
+            $task->validate();
+            $task->save();
+
+        } catch (ValidationException $e) {
+            return new JsonResponse([ 'errors' => $e->errors() ], 400);
+        } catch (PDOException $e) {
+            return new JsonResponse([ 'errors' => $e->getMessage() ]);
+        }
+
+        return new TaskResource($task);
+
     }
 
     /**
