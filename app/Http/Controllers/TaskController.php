@@ -79,14 +79,15 @@ class TaskController extends Controller
         return new TaskResource($task);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Task  $task
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Task $task)
+    public function deleteAllDone(DatabaseManager $db)
     {
-        //
+        try {
+            $db->table('tasks')->where('state','done')->delete();
+        } catch (PDOException $e) {
+            return new JsonResponse([ 'errors' => $e->getMessage() ]);
+        }
+
+        return new JsonResponse();
     }
+
 }
