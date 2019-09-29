@@ -28,6 +28,7 @@ class TaskController extends Controller
 
         return [
             'data' => TaskResource::collection($tasks),
+            'error' => false,
         ];
     }
 
@@ -51,7 +52,10 @@ class TaskController extends Controller
             return new JsonResponse([ 'errors' => $e->getMessage() ]);
         }
 
-        return new TaskResource($task);
+        return [
+            'data' => new TaskResource($task),
+            'error' => false,
+        ];
 
     }
 
@@ -76,7 +80,10 @@ class TaskController extends Controller
             return new JsonResponse([ 'errors' => $e->getMessage() ]);
         }
 
-        return new TaskResource($task);
+        return [
+            'data' => new TaskResource($task),
+            'error' => false,
+        ];
     }
 
     public function deleteAllDone(DatabaseManager $db)
@@ -87,7 +94,10 @@ class TaskController extends Controller
             return new JsonResponse([ 'errors' => $e->getMessage() ]);
         }
 
-        return new JsonResponse();
+        return [
+            'data' => new JsonResponse(),
+            'error' => false,
+        ];
     }
 
 }
