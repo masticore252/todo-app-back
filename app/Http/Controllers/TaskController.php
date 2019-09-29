@@ -12,6 +12,8 @@ use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\Validator;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Filesystem\FilesystemManager;
+use Illuminate\Database\DatabaseManager;
 
 class TaskController extends Controller
 {
@@ -100,4 +102,51 @@ class TaskController extends Controller
         ];
     }
 
+    public function uploadAttachment(Task $task, Request $request)
+    {
+        $name = '01';
+        $path = "tasks/{$task->id}/01";
+
+        $task->attachment = $name;
+        $task->attachment_type = $request->header('Content-Type') ?? 'text/plain';
+
+        try {
+            if ($request->file('attachment')->isValid()) {
+
+                $request->file('attachment')->storeAs($path, "01");
+                $task->save();
+
+            }
+        } catch (\Throwable $th) {
+            return new JsonResponse(['errors' => 'file could not be uploaded, try again later'], 500);
+        }
+
+        return new JsonResponse([
+            'data' => [],
+            'error' => false,
+        ]);
+    }
+
+    public function downloadAttachment(Task $task, FilesystemManager $filesystem)
+    {
+        $contents = null;
+        $status = 404;
+        $headers = [];
+
+        if ($task && $task->attachment ) {
+            try {
+                $contents = $filesystem->get("tasks/{$task->id}/$task->attachment");
+                $status = 200;
+                $headers = [
+                    'Content-Type' => $task->attachment_type,
+                    'Content-Disposition' => "attachment; filename=\"{$task->filename}\"",
+                ];
+            } catch (\Throwable $th) {
+                $status = 500;
+                return new JsonResponse(['errors' => ['there was a problem finding the attachment, try again later']], $status);
+            }
+        }
+
+        return new Response($contents, $status, $headers);
+    }
 }
