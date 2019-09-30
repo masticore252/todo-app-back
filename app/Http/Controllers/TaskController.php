@@ -54,10 +54,10 @@ class TaskController extends Controller
             return new JsonResponse([ 'errors' => $e->getMessage() ]);
         }
 
-        return [
+        return new JsonResponse([
             'data' => new TaskResource($task),
             'error' => false,
-        ];
+        ]);
 
     }
 
