@@ -49,9 +49,9 @@ class TaskController extends Controller
             $task->save();
 
         } catch (ValidationException $e) {
-            return new JsonResponse([ 'errors' => $e->errors() ], 400);
+            return new JsonResponse([ 'error' => $e->errors() ], 400);
         } catch (PDOException $e) {
-            return new JsonResponse([ 'errors' => $e->getMessage() ]);
+            return new JsonResponse([ 'error' => $e->getMessage() ]);
         }
 
         return new JsonResponse([
@@ -77,9 +77,9 @@ class TaskController extends Controller
             $task->validate();
             $task->save();
         } catch (ValidationException $e) {
-            return new JsonResponse([ 'errors' => $e->errors() ], 400);
+            return new JsonResponse([ 'error' => $e->errors() ], 400);
         } catch (PDOException $e) {
-            return new JsonResponse([ 'errors' => $e->getMessage() ]);
+            return new JsonResponse([ 'error' => $e->getMessage() ]);
         }
 
         return [
@@ -93,7 +93,7 @@ class TaskController extends Controller
         try {
             $db->table('tasks')->where('state','done')->delete();
         } catch (PDOException $e) {
-            return new JsonResponse([ 'errors' => $e->getMessage() ]);
+            return new JsonResponse([ 'error' => $e->getMessage() ]);
         }
 
         return [
@@ -118,7 +118,7 @@ class TaskController extends Controller
 
             }
         } catch (\Throwable $th) {
-            return new JsonResponse(['errors' => 'file could not be uploaded, try again later'], 500);
+            return new JsonResponse(['error' => 'file could not be uploaded, try again later'], 500);
         }
 
         return new JsonResponse([
@@ -143,7 +143,7 @@ class TaskController extends Controller
                 ];
             } catch (\Throwable $th) {
                 $status = 500;
-                return new JsonResponse(['errors' => ['there was a problem finding the attachment, try again later']], $status);
+                return new JsonResponse(['error' => ['there was a problem finding the attachment, try again later']], $status);
             }
         }
 

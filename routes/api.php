@@ -28,6 +28,3 @@ Route::delete('/tasks/delete_done','TaskController@deleteAllDone');
 Route::get('/tasks/{task}/attachment','TaskController@downloadAttachment');
 
 Route::post('/tasks/{task}/attachment','TaskController@uploadAttachment');
-
-Route::put('/tasks/{task}','TaskController@update');
-
