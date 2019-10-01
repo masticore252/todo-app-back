@@ -25,13 +25,16 @@ class TaskController extends Controller
     public function index(Request $request)
     {
         $filters = $request->input('filters');
+        try {
+            $tasks = Task::all();
+        } catch (PDOException $e) {
+            return new JsonResponse(['error' => ['error conecting to database']], 500);
+        }
 
-        $tasks = Task::all();
-
-        return [
+        return new JsonResponse([
             'data' => TaskResource::collection($tasks),
             'error' => false,
-        ];
+        ]);
     }
 
     /**
@@ -51,7 +54,7 @@ class TaskController extends Controller
         } catch (ValidationException $e) {
             return new JsonResponse([ 'error' => $e->errors() ], 400);
         } catch (PDOException $e) {
-            return new JsonResponse([ 'error' => $e->getMessage() ]);
+            return new JsonResponse([ 'error' => ['error conecting to database']], 500);
         }
 
         return new JsonResponse([
@@ -79,13 +82,13 @@ class TaskController extends Controller
         } catch (ValidationException $e) {
             return new JsonResponse([ 'error' => $e->errors() ], 400);
         } catch (PDOException $e) {
-            return new JsonResponse([ 'error' => $e->getMessage() ]);
+            return new JsonResponse([ 'error' => ['error conecting to database'] ], 500);
         }
 
-        return [
+        return new JsonResponse([
             'data' => new TaskResource($task),
             'error' => false,
-        ];
+        ]);
     }
 
     public function deleteAllDone(DatabaseManager $db)
@@ -93,13 +96,12 @@ class TaskController extends Controller
         try {
             $db->table('tasks')->where('state','done')->delete();
         } catch (PDOException $e) {
-            return new JsonResponse([ 'error' => $e->getMessage() ]);
+            return new JsonResponse([ 'error' => ['error conecting to database'] ], 500);
         }
 
-        return [
-            'data' => new JsonResponse(),
+        return new JsonResponse([
             'error' => false,
-        ];
+        ]);
     }
 
     public function uploadAttachment(Task $task, Request $request)
