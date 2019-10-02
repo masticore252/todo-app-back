@@ -18,7 +18,7 @@ class CreateTasksTable extends Migration
             $table->string('description', 100);
             $table->string('state', 10);
             $table->string('attachment', 255);
-            $table->string('attachment_type', 255);
+            $table->string('attachmentType', 255);
             $table->timestamps();
         });
     }

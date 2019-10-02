@@ -12,20 +12,14 @@ class Task extends Model
         'description',
         'state',
         'attachment',
-        'attachment_type',
+        'attachmentType',
     ];
 
     protected $attributes = [
         'description' => '',
         'state' => 'pending',
         'attachment' => '',
-        'attachment_type' => '',
-    ];
-
-    protected $fileExtensions = [
-        'image/jpeg'        => 'jpeg',
-        'image/png'         => 'png',
-        'application/pdf'   => 'pdf',
+        'attachmentType' => '',
     ];
 
     public function validate()
@@ -44,15 +38,20 @@ class Task extends Model
         return true;
     }
 
-    public function getFilenameAttribute()
+    public static function getFileExtension($mimetype)
     {
-        if (Arr::has($this->fileExtensions, $this->attachment_type)){
-            return "{$this->attachment}.{$this->fileExtensions[$this->attachment_type]}";
+
+        $fileExtensions = [
+            'image/jpeg'        => '.jpeg',
+            'image/png'         => '.png',
+            'application/pdf'   => '.pdf',
+            'text/plain'        => '.txt',
+        ];
+
+        if (Arr::has($fileExtensions, $mimetype)){
+            return $fileExtensions[$mimetype];
         }
 
-        \Log::warning('task has an attachment with unknown mediatype', [
-            'task' => $this->toArray(),
-        ]);
         return false;
     }
 }

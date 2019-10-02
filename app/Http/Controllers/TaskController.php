@@ -7,6 +7,7 @@ use PDOException;
 use App\Task;
 use App\Http\Resources\TaskResource;
 
+use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
@@ -106,18 +107,19 @@ class TaskController extends Controller
 
     public function uploadAttachment(Task $task, Request $request)
     {
-        $name = '01';
-        $path = "tasks/{$task->id}/01";
+        $mimetype = $request['mime-type'] ?? 'text/plain';
+        $path = 'tasks/';
+        $name = 'attachment_'.$task->id.Task::getFileExtension($mimetype);
 
-        $task->attachment = $name;
-        $task->attachment_type = $request->header('Content-Type') ?? 'text/plain';
+        $task->attachment = $path.$name;
+        $task->attachmentType = $mimetype;
 
         try {
             if ($request->file('attachment')->isValid()) {
-
-                $request->file('attachment')->storeAs($path, "01");
+                $request->file('attachment')->storeAs($path, $name);
                 $task->save();
-
+            } else{
+                throw new Exception("Uploaded file is invalid");
             }
         } catch (\Throwable $th) {
             return new JsonResponse(['error' => 'file could not be uploaded, try again later'], 500);
@@ -134,14 +136,15 @@ class TaskController extends Controller
         $contents = null;
         $status = 404;
         $headers = [];
+        $filename = Arr::last(explode('/',$task->attachment));
 
         if ($task && $task->attachment ) {
             try {
-                $contents = $filesystem->get("tasks/{$task->id}/$task->attachment");
+                $contents = $filesystem->get($task->attachment);
                 $status = 200;
                 $headers = [
                     'Content-Type' => $task->attachment_type,
-                    'Content-Disposition' => "attachment; filename=\"{$task->filename}\"",
+                    'Content-Disposition' => "attachment; filename=\"{$filename}\"",
                 ];
             } catch (\Throwable $th) {
                 $status = 500;
