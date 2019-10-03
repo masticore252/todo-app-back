@@ -92,12 +92,25 @@ class TaskController extends Controller
         ]);
     }
 
-    public function deleteAllDone(DatabaseManager $db)
+    public function deleteAllDone(FilesystemManager $filesystem)
     {
         try {
-            $db->table('tasks')->where('state','done')->delete();
+            $query = Task::where('state','!=','pending');
+            $tasks = $query->get();
+
+            $query->delete();
+
+            // TODO move this to a backgropund job to save request time
+            // filesystem operations can be expensive
+            $count = 0;
+            foreach ($tasks as $task) {
+                $filesystem->delete($task->attachment);
+                $count++;
+            }
         } catch (PDOException $e) {
-            return new JsonResponse([ 'error' => ['error conecting to database'] ], 500);
+            return new JsonResponse([ 'error' => ['error deleting tasks, try again later'] ], 500);
+        } catch (Exception $e) {
+            return new JsonResponse([ 'error' => ["error deleting all the tasks, only {$count} were deleted"] ], 500);
         }
 
         return new JsonResponse([
@@ -143,7 +156,7 @@ class TaskController extends Controller
                 $contents = $filesystem->get($task->attachment);
                 $status = 200;
                 $headers = [
-                    'Content-Type' => $task->attachment_type,
+                    'Content-Type' => $task->attachmentType,
                     'Content-Disposition' => "attachment; filename=\"{$filename}\"",
                 ];
             } catch (\Throwable $th) {
